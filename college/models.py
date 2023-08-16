@@ -13,6 +13,8 @@ Position_Choices = {('Prof Dr.', 'Prof Dr'), ('Dr.', 'Dr'), ('Mr.', 'Mr'), ('Ms.
 
 class Programme(models.Model):
     name = models.CharField(max_length=50, unique=True )
+    # coordinator, change to foreign key
+    coordinator = models.ForeignKey(to='Teacher', on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return self.name

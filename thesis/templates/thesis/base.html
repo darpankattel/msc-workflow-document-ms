@@ -13,6 +13,8 @@
     <script src="{% static 'js/jquery.js' %}"></script>
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
 
+
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
     <!-- Latest compiled JavaScript -->
     {#    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>#}
 {#    <link rel="stylesheet" href="{% static 'thesis/base.css' %}">#}
@@ -21,6 +23,8 @@
 {% endblock %}
 
 {% block content %}
+
+    {% if request.path != '/docgen/' %}
     <nav class="navbar navbar-default sidebar" role="navigation">
         <div class="container-fluid">
             <div class="navbar-header">
@@ -62,6 +66,7 @@
             </div>
         </div>
     </nav>
+    {% endif %}
 
     {% block body %}
 

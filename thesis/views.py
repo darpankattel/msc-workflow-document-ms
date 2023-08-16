@@ -8,8 +8,9 @@ import os
 from thesis.models import Student, CommonFields, Budget, Coordinator
 from .forms import NoticeForm, MidTermThesisCommittee, StudentFormset, \
     NoticeFormExtra, CurrentDate, ResultFormset
-from django.views.generic import TemplateView
-
+from django.http import HttpResponse
+import uuid
+from django.contrib import messages
 
 # Create your views here.
 
@@ -131,7 +132,7 @@ def proposalNotice(request):
         form = NoticeForm(request.POST)
         formExtra = NoticeFormExtra(request.POST)
         if form.is_valid() and formExtra.is_valid():
-            admins = Coordinator.objects.all().get()
+            admins = Coordinator.objects.all().get(user=request.user.id)
             form.save()
             Common = CommonFields.objects.all()
             if len(Common) > 1:
@@ -149,10 +150,17 @@ def proposalNotice(request):
             src_add = os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Templates'), 'Proposal'),
                 'ProposalNotice.docx')
-            utils.render_to_word(src_add, os.path.join(
+            output_path = os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Documents'), 'Proposal'),
-                'ProposalNotice.docx'), context)
-            return redirect('thesis:index')
+                f"ProposalNotice_{uuid.uuid4()}.docx")
+            utils.render_to_word(src_add, output_path, context)
+            
+            response = HttpResponse(open(output_path, 'rb').read())
+            response['Content-Type'] = 'mimetype/submimetype'
+            response['Content-Disposition'] = 'attachment; filename=ProposalNotice.docx'
+            # messages.success(request, "The Download is starting...")
+            return response
+            # return redirect('thesis:index')
         else:
             return redirect('thesis:invalid')
 
@@ -167,7 +175,7 @@ def midTermNotice(request):
         form = NoticeForm(request.POST)
         print(form.errors)
         if form.is_valid():
-            admins = Coordinator.objects.all().get()
+            admins = Coordinator.objects.all().get(user=request.user.id)
             form.save()
             Common = CommonFields.objects.all()
             if len(Common) > 1:
@@ -178,10 +186,17 @@ def midTermNotice(request):
             src_add = os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Templates'), 'Midterm'),
                 'MidtermNotice.docx')
-            utils.render_to_word(src_add, os.path.join(
+            output_path = os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Documents'), 'Midterm'),
-                'midtermNotice.docx'), context)
-            return redirect('thesis:index')
+                'midtermNotice.docx')
+            
+            utils.render_to_word(src_add, output_path, context)
+            response = HttpResponse(open(output_path, 'rb').read())
+            response['Content-Type'] = 'mimetype/submimetype'
+            response['Content-Disposition'] = 'attachment; filename=midtermNotice.docx'
+            # messages.success(request, "The Download is starting...")
+            return response
+            # return redirect('thesis:index')
 
     else:
         form = NoticeForm()
@@ -194,7 +209,7 @@ def finalNotice(request):
         form = NoticeForm(request.POST)
         formExtra = NoticeFormExtra(request.POST)
         if form.is_valid() and formExtra.is_valid():
-            admins = Coordinator.objects.all().get()
+            admins = Coordinator.objects.all().get(user=request.user.id)
             form.save()
             Common = CommonFields.objects.all()
             if len(Common) > 1:
@@ -209,10 +224,16 @@ def finalNotice(request):
             src_add = os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Templates'), 'Final'),
                 'FinalNotice.docx')
-            utils.render_to_word(src_add, os.path.join(
+            output_path  = os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Documents'), 'Final'),
-                'finalNotice.docx'), context)
-            return redirect('thesis:index')
+                'finalNotice.docx')
+            utils.render_to_word(src_add, output_path, context)
+            response = HttpResponse(open(output_path, 'rb').read())
+            response['Content-Type'] = 'mimetype/submimetype'
+            response['Content-Disposition'] = 'attachment; filename=finalNotice.docx'
+            # messages.success(request, "The Download is starting...")
+            return response
+            # return redirect('thesis:index')
 
     else:
         form = NoticeForm()
@@ -223,7 +244,7 @@ def finalNotice(request):
 def midtermthesislist(request):
     if request.method == 'POST':
         budgets = Budget.objects.all().get()
-        admins = Coordinator.objects.all().get()
+        admins = Coordinator.objects.all().get(user=request.user.id)
         Common = CommonFields.objects.all()
         defenseDate = str(Common[0].defenseDate)
         studentBatch = str(Common[0].studentBatch)
@@ -467,11 +488,18 @@ def midtermthesislist(request):
             src_add = os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Templates'), 'Midterm'),
                 'MidtermCommittee.docx')
-            utils.render_to_word(src_add, os.path.join(
+            output_path = os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Documents'), 'Midterm'),
-                'MidtermCommittee.docx'), context1)
+                'MidtermCommittee.docx')
+            utils.render_to_word(src_add, output_path, context1)
 
-            return redirect('thesis:index')
+            response = HttpResponse(open(output_path, 'rb').read())
+            response['Content-Type'] = 'mimetype/submimetype'
+            response['Content-Disposition'] = 'attachment; filename=MidtermCommittee.docx'
+            # messages.success(request, "The Download is starting...")
+            return response
+
+            # return redirect('thesis:index')
 
     else:
         form = MidTermThesisCommittee()
@@ -480,11 +508,11 @@ def midtermthesislist(request):
 
 
 # Finals
-
+# TODO Error, not filling the template
 def finalthesislist(request):
     if request.method == 'POST':
         budgets = Budget.objects.all().get()
-        admins = Coordinator.objects.all().get()
+        admins = Coordinator.objects.all().get(user=request.user.id)
         Common = CommonFields.objects.all()
         defenseDate = str(Common[0].defenseDate)
         studentBatch = str(Common[0].studentBatch)
@@ -728,11 +756,17 @@ def finalthesislist(request):
 
             src_add = os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Templates'), 'Final'),
-                'FinalCommittee.docx')
-            utils.render_to_word(src_add, os.path.join(
+                'FinalThesisList.docx')
+            output_path = os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Documents'), 'Final'),
-                'FinalCommittee.docx'), context1)
-            return redirect('thesis:index')
+                'FinalThesisList.docx')
+            utils.render_to_word(src_add, output_path, context1)
+            response = HttpResponse(open(output_path, 'rb').read())
+            response['Content-Type'] = 'mimetype/submimetype'
+            response['Content-Disposition'] = 'attachment; filename=FinalThesisList.docx'
+            # messages.success(request, "The Download is starting...")
+            return response
+            # return redirect('thesis:index')
 
     else:
         form = MidTermThesisCommittee()
@@ -750,7 +784,7 @@ def results(request):
         Common = CommonFields.objects.all()
         defenseDate = str(Common[0].defenseDate)
         studentBatch = str(Common[0].studentBatch)
-        admins = Coordinator.objects.all().get()
+        admins = Coordinator.objects.all().get(user=request.user.id)
         print(formset.errors)
         if formset.is_valid() and form.is_valid():
             context1 = form.cleaned_data
@@ -802,11 +836,16 @@ def results(request):
             src_add = os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Templates'), 'Final'),
                 'FinalThesisResult.docx')
-            utils.make_table(src_add, os.path.join(
+            output_path = os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Documents'), 'Final'),
-                'FinalThesisResult.docx'), thesisListElements)
-
-            return redirect('thesis:index')
+                'FinalThesisResult.docx')
+            utils.make_table(src_add, output_path, thesisListElements)
+            response = HttpResponse(open(output_path, 'rb').read())
+            response['Content-Type'] = 'mimetype/submimetype'
+            response['Content-Disposition'] = 'attachment; filename=FinalThesisResult.docx'
+            # messages.success(request, "The Download is starting...")
+            return response
+            # return redirect('thesis:index')
     else:
         form = CurrentDate()
         formset = ResultFormset(

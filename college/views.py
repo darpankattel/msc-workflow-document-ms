@@ -131,9 +131,8 @@ def exportteachers(request):
                             + "<a href='../'>" + 'Login here.' +
                             "</a> <br> <br> <br> If you think this is a mistake contact WebAdmin.")
     output_path = os.path.join(os.path.dirname(os.path.realpath(__name__)), 'temp_python_spreadsheet.xlsx')
-    wb = Workbook()
     book = openpyxl.Workbook()
-
+    # sheet = book.get_sheet_by_name("Sheet")
     sheet = book.get_sheet_by_name("Sheet")
 
     row = 3
@@ -147,39 +146,26 @@ def exportteachers(request):
     sheet['F2'] = "Affiliated Institute"
     sheet['G2'] = "Upper Degree"
     sheet['H2'] = "Affilation Type"
-
     sheet['B1'] = "Teachers List"
     sheet['E1'] = "Generated: "
     sheet['F1'] = datetime.today().strftime('%Y-%m-%d')
 
     for eachteacher in Teacher.objects.all():
         sheet[colnum_string(col + 5) + str(row)] = str(eachteacher.full_name())
-        #
         sheet[colnum_string(col + 6) + str(row)] = str(eachteacher.get_teacher_experience_years())
-        #
         sheet[colnum_string(col + 7) + str(row)] = str(eachteacher.home_phone)
-        #
         sheet[colnum_string(col + 8) + str(row)] = str(eachteacher.mobile_phone)
-        #
         sheet[colnum_string(col + 9) + str(row)] = str(eachteacher.email)
-        #
         sheet[colnum_string(col + 10) + str(row)] = str(eachteacher.affiliated_institute.code)
-        #
         sheet[colnum_string(col + 11) + str(row)] = str(eachteacher.upper_degree)
-        #
         sheet[colnum_string(col + 12) + str(row)] = str(eachteacher.aff_type)
-
         # TODO add other methods to dump in xlsx here
-
         row += 1
-
     book.save(output_path)
-
     response = HttpResponse(open(output_path, 'rb').read())
     response['Content-Type'] = 'mimetype/submimetype'
     response['Content-Disposition'] = 'attachment; filename=TeachersList.xlsx'
     return response
-
 
 def exportexperts(request):
     if not request.user.is_superuser:

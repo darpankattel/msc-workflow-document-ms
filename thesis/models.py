@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.contrib.auth.models import User
 
 
 from college.models import Teacher, Expert, Programme
@@ -35,19 +35,17 @@ class CommonFields(models.Model):
 
 
 class Coordinator(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     coordinatorName = models.ForeignKey(Teacher, on_delete=models.SET_NULL, blank=True, null=True)
-    programName = models.ForeignKey(Programme, on_delete=models.SET_NULL, blank=True, null=True)
+    programName = models.ForeignKey(Programme, on_delete=models.SET_NULL, blank=True, null=True, related_name="programCoordinator")
 
     def __str__(self):
         return f'{str(self.coordinatorName)}'
 
-    def save(self, *args, **kwargs):
-        if self.__class__.objects.count():
-            self.pk = self.__class__.objects.first().pk
-        super().save(*args, **kwargs)
-
-
-
+    # def save(self, *args, **kwargs):
+    #     if self.__class__.objects.count():
+    #         self.pk = self.__class__.objects.first().pk
+    #     super().save(*args, **kwargs)
 
 class Budget(models.Model):
     externalExaminer = models.FloatField(blank=False, null=False)
